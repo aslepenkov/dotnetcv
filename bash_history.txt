@@ -1,0 +1,5 @@
+    2  dotnet --list-sdks
+    4  dotnet new list
+    5  dotnet new webapi
+    6  history
+    7  history > bash_history.txt
