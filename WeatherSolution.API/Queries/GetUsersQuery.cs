@@ -1,0 +1,1 @@
+public record GetUsersQuery() : IRequest<IEnumerable<User>>;

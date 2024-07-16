@@ -1,0 +1,1 @@
+public record GetObservationsQuery(string City, DateTime Date) : IRequest<IEnumerable<WeatherObservation>>;
