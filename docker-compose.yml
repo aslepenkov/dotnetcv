@@ -1,0 +1,91 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: dotnetcv-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: dotnetcv
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend-service1:
+    #image: mcr.microsoft.com/dotnet/aspnet:latest
+    image: mcr.microsoft.com/dotnet/sdk:latest
+    container_name: dotnetcv-backend-service1
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5001
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./backend/service1:/app
+    working_dir: /app
+    command: [ "dotnet", "run" ]
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5001/health" ]
+      interval: 10s
+      retries: 3
+      start_period: 5s
+
+  backend-service2:
+    #image: mcr.microsoft.com/dotnet/aspnet:latest
+    image: mcr.microsoft.com/dotnet/sdk:latest
+    container_name: dotnetcv-backend-service2
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5002
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./backend/service2:/app
+    working_dir: /app
+    command: [ "dotnet", "run" ]
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5002/health" ]
+      interval: 10s
+      retries: 3
+      start_period: 5s
+
+  frontend:
+    image: node:latest
+    container_name: dotnetcv-frontend
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
+    command: [ "npm", "start" ]
+
+  localstack:
+    image: localstack/localstack:latest
+    container_name: dotnetcv-localstack
+    restart: unless-stopped
+    environment:
+      - SERVICES=s3,sns,sqs,lambda,ssm
+      - DEBUG=1
+    ports:
+      - "4566:4566"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+  dev:
+    image: mcr.microsoft.com/dotnet/sdk:latest
+    container_name: dotnetcv-dev
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+    command: [ "/bin/sh", "-c", "sleep infinity" ]
+
+volumes:
+  postgres_data:

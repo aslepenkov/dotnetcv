@@ -1,1 +1,0 @@
-public record AddObservationCommand(string LocationName, string ZipCode, double Latitude, double Longitude, double Temperature, double WindSpeed, string Conditions, DateTime ObservationDate) : IRequest<WeatherObservation>;

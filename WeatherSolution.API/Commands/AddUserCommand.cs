@@ -1,1 +1,0 @@
-public record AddUserCommand(string Login, Authorization Authorizations, string ImageUrl) : IRequest<User>;
