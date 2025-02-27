@@ -1,17 +1,4 @@
 services:
-  postgres:
-    image: postgres:latest
-    container_name: dotnetcv-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: dotnetcv
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
   backend-service1:
     #image: mcr.microsoft.com/dotnet/aspnet:latest
     image: mcr.microsoft.com/dotnet/sdk:latest
@@ -75,18 +62,36 @@ services:
       retries: 3
       start_period: 5s
 
-
   localstack:
     image: localstack/localstack:latest
     container_name: dotnetcv-localstack
     restart: unless-stopped
-    environment:
-      - SERVICES=s3,sns,sqs,lambda,ssm
-      - DEBUG=1
     ports:
       - "4566:4566"
+    environment:
+      - SERVICES=s3,sns,sqs,lambda,ssm,apigateway
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - DEBUG=1
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./lambda:/lambda"  # Mount all Lambda directories
+      - "./localstack/init-localstack.sh:/init-localstack.sh"  # Mount init script
+    entrypoint: ["/bin/sh", "-c", "sleep 30 && /init-localstack.sh"]
+
+  postgres:
+    image: postgres:latest
+    container_name: dotnetcv-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: dotnetcv
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
 
   dev:
     image: mcr.microsoft.com/dotnet/sdk:latest
@@ -96,5 +101,35 @@ services:
     working_dir: /app
     command: [ "/bin/sh", "-c", "sleep infinity" ]
 
+  ## 📌 **LOKI for log storage**
+  loki:
+    image: grafana/loki:latest
+    container_name: dotnetcv-loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+
+  ## 📌 **Promtail collects logs from all containers**
+  promtail:
+    image: grafana/promtail:latest
+    container_name: dotnetcv-promtail
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./localstack/promtail-config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    restart: unless-stopped
+
+  ## 📌 **Grafana for viewing logs**
+  grafana:
+    image: grafana/grafana:latest
+    container_name: dotnetcv-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+
 volumes:
-  postgres_data:
+  grafana-data:
+  postgres-data:

@@ -3,9 +3,13 @@ import { useEffect, useState } from "react";
 import { checkHealth } from "../services/healthService";
 
 const services = [
-  { name: "Service 1", url: "http://localhost:5001/health" },
-  { name: "Service 2", url: "http://localhost:5002/health" },
-  { name: "Service 3", url: "http://localhost:5003/health" },
+  { name: "MicroService1", url: "http://localhost:5001/health" },
+  { name: "MicroService2", url: "http://localhost:5002/health" },
+  { name: "LocalStack", url: "http://localhost:4566/_localstack/health" },
+  {
+    name: "PostgreSQL (Lambda)",
+    url: "http://localhost:4566/restapis/{your-api-id}/default/_user_request_/postgres-health"
+  },
   { name: "Service 4", url: "http://localhost:5004/health" },
   { name: "Service 5", url: "http://localhost:5005/health" },
 ];
