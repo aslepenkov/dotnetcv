@@ -57,15 +57,24 @@ services:
       start_period: 5s
 
   frontend:
-    image: node:latest
+    image: node:latest  # Latest Node.js
     container_name: dotnetcv-frontend
-    restart: unless-stopped
     working_dir: /app
     volumes:
       - ./frontend:/app
+      - /app/node_modules  # Prevents conflicts
     ports:
-      - "3000:3000"
-    command: [ "npm", "start" ]
+      - "5173:5173"  # Expose React app
+    command: ["sh", "-c", "npm install && npm run dev"]  # Ensure dependencies are installed
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5173/" ]
+      interval: 10s
+      retries: 3
+      start_period: 5s
+
 
   localstack:
     image: localstack/localstack:latest
@@ -83,7 +92,7 @@ services:
     image: mcr.microsoft.com/dotnet/sdk:latest
     container_name: dotnetcv-dev
     volumes:
-      - ./backend:/app
+      - ./:/app
     working_dir: /app
     command: [ "/bin/sh", "-c", "sleep infinity" ]
 

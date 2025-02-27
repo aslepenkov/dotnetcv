@@ -16,8 +16,25 @@ builder.Host.UseSerilog(); // Use Serilog as the logging provider
 
 // Add services to the container
 builder.Services.AddOpenApi();
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        policy.SetIsOriginAllowed(origin =>
+        {
+            // Allow any port for localhost
+            return allowedOrigins.Any(allowed => origin.StartsWith(allowed));
+        })
+        .AllowAnyMethod()
+        .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
+app.UseCors("FrontendPolicy"); // Apply CORS globally
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
