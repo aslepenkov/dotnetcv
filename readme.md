@@ -34,3 +34,16 @@
 
 
 docker compose down && docker compose build --no-cache && docker compose up -d
+
+docker exec -it dotnetcv-dev dotnet publish /app/lambda/PostgresHealthLambda/src/PostgresHealthLambda/PostgresHealthLambda.csproj -c Release -r linux-x64 --self-contained true -o /app/lambda/PostgresHealthLambda/src/PostgresHealthLambda/out
+
+sudo chown -R $(whoami):$(whoami) ~/dev/dotnetcv/lambda
+
+docker exec -it dotnetcv-dev dotnet publish -c Release -r linux-x64 --self-contained true -o out
+zip -r function.zip .
+
+docker exec -it dotnetcv-localstack bash /init-localstack.sh
+
+docker exec -it dotnetcv-localstack awslocal lambda invoke \
+  --function-name PostgresHealthLambda \
+  --payload '{}' /dev/stdout

@@ -47,3 +47,8 @@ Deploy function to AWS Lambda
     cd "PostgresHealthLambda/src/PostgresHealthLambda"
     dotnet lambda deploy-function
 ```
+
+
+
+dotnet publish -c Release -r linux-x64 --self-contained false -o out
+zip -r function.zip .

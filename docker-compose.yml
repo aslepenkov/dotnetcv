@@ -69,16 +69,19 @@ services:
     ports:
       - "4566:4566"
     environment:
-      - SERVICES=s3,sns,sqs,lambda,ssm,apigateway
+      - SERVICES=s3,sns,sqs,lambda,ssm,apigateway,iam,logs
       - AWS_DEFAULT_REGION=us-east-1
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - DEBUG=1
+      - DATA_DIR=/var/lib/localstack  # Persistent data directory
+      - PERSISTENCE=1
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "./lambda:/lambda"  # Mount all Lambda directories
       - "./localstack/init-localstack.sh:/init-localstack.sh"  # Mount init script
-    entrypoint: ["/bin/sh", "-c", "sleep 30 && /init-localstack.sh"]
+      - "./localstack/init-gatewayapi.sh:/init-gatewayapi.sh"  # Mount init script
+      - "localstack-data:/var/lib/localstack"  # Persistent volume for LocalStack
 
   postgres:
     image: postgres:latest
@@ -133,3 +136,4 @@ services:
 volumes:
   grafana-data:
   postgres-data:
+  localstack-data:

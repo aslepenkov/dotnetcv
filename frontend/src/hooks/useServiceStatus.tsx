@@ -8,7 +8,7 @@ const services = [
   { name: "LocalStack", url: "http://localhost:4566/_localstack/health" },
   {
     name: "PostgreSQL (Lambda)",
-    url: "http://localhost:4566/restapis/{your-api-id}/default/_user_request_/postgres-health"
+    url: "http://localhost:4566/restapis/tn10ykuexk/default/_user_request_/postgres-health"
   },
   { name: "Service 4", url: "http://localhost:5004/health" },
   { name: "Service 5", url: "http://localhost:5005/health" },
