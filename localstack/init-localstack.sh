@@ -13,49 +13,47 @@ else
     echo "IAM role '$role_name' already exists. Skipping creation."
 fi
 
+echo "Deploying .NET Lambda..."
 
-echo "Deploying .NET Lambdas..."
+# Get the pre-built Lambda package
+LAMBDA_ZIP="/lambda/PostgresHealthLambda/src/PostgresHealthLambda/out/function.zip"
 
-# Loop through all Lambda projects inside /lambda
-for lambda_dir in /lambda/*/src/; do
-  if [ -d "$lambda_dir" ]; then
-    lambda_name=$(basename $(dirname "$lambda_dir"))  # Extract Lambda name from folder
+if [ ! -f "$LAMBDA_ZIP" ]; then
+    echo "Error: Lambda package not found at $LAMBDA_ZIP"
+    exit 1
+fi
 
-    cd "$lambda_dir/$lambda_name/out" || { echo "Error: out folder not found"; exit 1; }
+# Deploy the Lambda function
+if awslocal lambda get-function --function-name "PostgresHealthLambda" > /dev/null 2>&1; then
+    echo "Updating existing Lambda: PostgresHealthLambda"
+    awslocal lambda update-function-code \
+        --function-name "PostgresHealthLambda" \
+        --zip-file "fileb://$LAMBDA_ZIP" \
+        || { echo "Failed to update lambda"; exit 1; }
+else
+    echo "Creating new Lambda: PostgresHealthLambda"
+    awslocal lambda create-function \
+        --function-name "PostgresHealthLambda" \
+        --runtime "dotnet8" \
+        --role "arn:aws:iam::000000000000:role/execution_role" \
+        --handler "PostgresHealthLambda::PostgresHealthLambda.Function::FunctionHandler" \
+        --timeout 30 \
+        --memory-size 256 \
+        --zip-file "fileb://$LAMBDA_ZIP" \
+        || { echo "Failed to create lambda"; exit 1; }
+fi
 
-    if awslocal lambda get-function --function-name "$lambda_name" > /dev/null 2>&1; then
-          echo "Updating existing Lambda: $lambda_name"
-          awslocal lambda update-function-code \
-              --function-name "$lambda_name" \
-              --zip-file fileb://function.zip \
-              || { echo "Failed to update lambda"; exit 1; }
-    else
-        echo "Creating new Lambda: $lambda_name"
-        awslocal lambda create-function \
-            --function-name "$lambda_name" \
-            --runtime "dotnet8" \
-            --role "arn:aws:iam::000000000000:role/execution_role" \
-            --handler "PostgresHealthLambda::PostgresHealthLambda.Function::FunctionHandler" \
-            --timeout 3 \
-            --memory-size 128 \
-            --zip-file fileb://function.zip \
-            || { echo "Failed to create lambda"; exit 1; }
-    fi
-
-    echo "Lambda $lambda_name update complete!"
-  fi
-done
-
+echo "Lambda deployment complete!"
 
 echo "Setting up SSM Parameter..."
 awslocal ssm put-parameter \
     --name "/config/postgres/connection-string" \
     --value "Host=dotnetcv-postgres;Database=dotnetcv;Username=admin;Password=admin" \
-    --type SecureString  || { echo "Failed to create ssm"; exit 1; }
+    --type SecureString \
+    --overwrite \
+    || { echo "Failed to create ssm"; exit 1; }
 
 echo "SSM Parameter Stored!"
-
-
 
 # Create API Gateway REST API
 API_ID=$(awslocal apigateway create-rest-api --name "PostgresHealthAPI" \
@@ -87,6 +85,8 @@ awslocal lambda add-permission --function-name PostgresHealthLambda \
   "arn:aws:execute-api:us-east-1:000000000000:$API_ID/*/GET/postgres-health"
 
 # Deploy the API
-awslocal apigateway create-deployment --rest-api-id "$API_ID" --stage-name dev
+DEPLOYMENT_ID=$(awslocal apigateway create-deployment --rest-api-id "$API_ID" --stage-name "default" \
+  --query 'id' --output text)
 
 echo "API Gateway setup complete. API ID: $API_ID"
+echo "API Endpoint: http://localhost:4566/restapis/$API_ID/default/_user_request_/postgres-health"

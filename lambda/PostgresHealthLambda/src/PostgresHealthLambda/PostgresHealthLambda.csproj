@@ -9,11 +9,13 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <!-- Generate ready to run images during publishing to improve cold start time. -->
     <PublishReadyToRun>true</PublishReadyToRun>
+    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+    <Platform>x64</Platform>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Amazon.Lambda.Core" Version="2.5.0" />
-    <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.4.4" />
-    <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="3.7.403.47" />
-    <PackageReference Include="Npgsql" Version="9.0.3" />
+    <PackageReference Include="Amazon.Lambda.Core" Version="2.2.0" />
+    <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.4.0" />
+    <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="3.7.301.11" />
+    <PackageReference Include="Npgsql" Version="8.0.2" />
   </ItemGroup>
 </Project>

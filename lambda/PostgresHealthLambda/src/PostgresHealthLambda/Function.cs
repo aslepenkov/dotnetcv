@@ -26,7 +26,20 @@ public class Function
     {
         context.Logger.Log("Lambda execution started.");
 
-        string connectionString;
+        try
+        {
+            var connectionString = await GetConnectionStringFromSSM(context);
+            return await CheckDatabaseConnection(connectionString, context);
+        }
+        catch (Exception ex)
+        {
+            context.Logger.Log($"Error: {ex.Message}");
+            return CreateErrorResponse("An unexpected error occurred.", ex.Message);
+        }
+    }
+
+    private async Task<string> GetConnectionStringFromSSM(ILambdaContext context)
+    {
         try
         {
             context.Logger.Log("Fetching SSM parameter...");
@@ -36,45 +49,41 @@ public class Function
                 WithDecryption = true
             };
             var response = await _ssmClient.GetParameterAsync(request);
-            connectionString = response.Parameter.Value;
             context.Logger.Log("Successfully retrieved SSM parameter.");
-
-            return new MemoryStream(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new { 
-                status = "Successfully retrieved SSM parameter.", 
-                db = "connected" 
-            })));
-
+            return response.Parameter.Value;
         }
         catch (Exception ex)
         {
             context.Logger.Log($"SSM error: {ex.Message}");
-            return new MemoryStream(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new { 
-                status = "error", 
-                error = "Failed to get SSM parameter", 
-                details = ex.Message 
-            })));
+            throw new Exception("Failed to get SSM parameter", ex);
         }
+    }
 
+    private async Task<Stream> CheckDatabaseConnection(string connectionString, ILambdaContext context)
+    {
         try
         {
             context.Logger.Log("Connecting to PostgreSQL...");
             await using var conn = new NpgsqlConnection(connectionString);
             await conn.OpenAsync();
             context.Logger.Log("Database connection successful.");
-            return new MemoryStream(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new { 
-                status = "ok", 
-                db = "connected" 
-            })));
+            return CreateSuccessResponse("Database connected successfully.");
         }
         catch (Exception ex)
         {
             context.Logger.Log($"Database connection error: {ex.Message}");
-            return new MemoryStream(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new { 
-                status = "error", 
-                db = "unreachable", 
-                error = ex.Message 
-            })));
+            return CreateErrorResponse("Database connection failed.", ex.Message);
         }
+    }
+
+    private Stream CreateSuccessResponse(string message)
+    {
+        return new MemoryStream(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new { status = "ok", message })));
+    }
+
+    private Stream CreateErrorResponse(string error, string details)
+    {
+        return new MemoryStream(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new { status = "error", error, details })));
     }
 
     public async Task<Stream> FunctionHandler0(Stream input, ILambdaContext context)

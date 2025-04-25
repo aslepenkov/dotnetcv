@@ -3,45 +3,56 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using SharedLibrary;
+using Microsoft.EntityFrameworkCore;
+using Service1.Infrastructure;
+using Amazon.SimpleNotificationService;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Serilog for request logging
-Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console()
-    .Enrich.FromLogContext()
-    .CreateLogger();
-
-builder.Host.UseSerilog(); // Use Serilog as the logging provider
+// Configure logging using shared library
+builder.ConfigureLogging();
 
 // Add services to the container
-builder.Services.AddOpenApi();
-var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("FrontendPolicy", policy =>
-    {
-        policy.SetIsOriginAllowed(origin =>
-        {
-            // Allow any port for localhost
-            return allowedOrigins.Any(allowed => origin.StartsWith(allowed));
-        })
-        .AllowAnyMethod()
-        .AllowAnyHeader();
-    });
-});
+// Add MediatR
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
+// Add EF Core with PostgreSQL
+builder.Services.AddDbContext<UserDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Add AWS SNS
+builder.Services.AddSingleton<IAmazonSimpleNotificationService>(_ => 
+    new AmazonSimpleNotificationServiceClient(
+        "test",
+        "test",
+        new AmazonSimpleNotificationServiceConfig 
+        { 
+            ServiceURL = "http://dotnetcv-localstack:4566"
+        }));
+
+// Add shared services
+builder.Services.AddSharedServices(builder.Configuration);
 
 var app = builder.Build();
 
 app.UseCors("FrontendPolicy"); // Apply CORS globally
+
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
+    app.UseSwagger();
+    app.UseSwaggerUI();
     app.MapOpenApi();
 }
 
 app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
 
 // Enable logging of each request
 app.UseSerilogRequestLogging();

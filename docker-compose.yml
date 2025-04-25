@@ -62,10 +62,26 @@ services:
       retries: 3
       start_period: 5s
 
+  lambda-builder:
+    image: mcr.microsoft.com/dotnet/sdk:latest
+    container_name: dotnetcv-lambda-builder
+    volumes:
+      - ./lambda:/app/lambda
+    working_dir: /app/lambda/PostgresHealthLambda/src/PostgresHealthLambda
+    command: >
+      sh -c "apt-get update && 
+             apt-get install -y zip &&
+             dotnet publish -c Release -r linux-x64 --self-contained true -o ./out &&
+             cd ./out &&
+             zip -r function.zip . &&
+             chmod -R 777 ."
+
   localstack:
     image: localstack/localstack:latest
     container_name: dotnetcv-localstack
     restart: unless-stopped
+    depends_on:
+      - lambda-builder
     ports:
       - "4566:4566"
     environment:
