@@ -1,18 +1,22 @@
+using System.Text.Json;
+using Amazon.SimpleNotificationService;
 using MediatR;
 using Service1.Domain;
 
 namespace Service1.Application.Commands;
 
-public record CreateUserCommand(string Email, string Name) : IRequest<User>;
+public sealed record CreateUserCommand(string Email, string Name) : IRequest<User>;
 
-public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, User>
+public sealed record UserCreatedEvent(string EventType, User User);
+
+public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, User>
 {
     private readonly Infrastructure.UserDbContext _context;
-    private readonly Amazon.SimpleNotificationService.IAmazonSimpleNotificationService _sns;
+    private readonly IAmazonSimpleNotificationService _sns;
 
     public CreateUserCommandHandler(
         Infrastructure.UserDbContext context,
-        Amazon.SimpleNotificationService.IAmazonSimpleNotificationService sns)
+        IAmazonSimpleNotificationService sns)
     {
         _context = context;
         _sns = sns;
@@ -20,25 +24,17 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, User>
 
     public async Task<User> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        var user = new User
-        {
-            Id = Guid.NewGuid(),
-            Email = request.Email,
-            Name = request.Name,
-            CreatedAt = DateTime.UtcNow,
-            IsActive = true
-        };
+        // Domain validation and creation using factory method
+        var user = User.Create(request.Email, request.Name);
 
-        _context.Users.Add(user);
+        await _context.Users.AddAsync(user, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
-        // Publish user created event to SNS
+        // Using records for event data
+        var userEvent = new UserCreatedEvent("UserCreated", user);
         await _sns.PublishAsync(
             "arn:aws:sns:us-east-1:000000000000:user-events",
-            System.Text.Json.JsonSerializer.Serialize(new { 
-                EventType = "UserCreated",
-                User = user
-            }),
+            JsonSerializer.Serialize(userEvent),
             cancellationToken);
 
         return user;

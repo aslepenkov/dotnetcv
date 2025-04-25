@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Service1.Application.Commands;
+using Service1.Application.Queries;
 using Service1.Domain;
 
 namespace Service1.Controllers;
@@ -16,6 +17,13 @@ public class UsersController : ControllerBase
         _mediator = mediator;
     }
 
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+    {
+        var users = await _mediator.Send(new GetUsersQuery());
+        return Ok(users);
+    }
+
     [HttpPost]
     public async Task<ActionResult<User>> CreateUser([FromBody] CreateUserCommand command)
     {
@@ -26,7 +34,9 @@ public class UsersController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<User>> GetUser(Guid id)
     {
-        // TODO: Implement GetUserQuery
-        return NotFound();
+        var user = await _mediator.Send(new GetUserQuery(id));
+        if (user == null)
+            return NotFound();
+        return Ok(user);
     }
 }
