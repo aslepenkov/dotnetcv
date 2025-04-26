@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { checkHealth } from "../services/healthService";
 
 const services = [
-  { name: "MicroService1", url: "http://localhost:5001/health" },
+  { name: "MicroUsersService", url: "http://localhost:5001/health" },
   { name: "MicroService2", url: "http://localhost:5002/health" },
   { name: "LocalStack", url: "http://localhost:4566/_localstack/health" },
   {

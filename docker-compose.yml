@@ -1,8 +1,8 @@
 services:
-  backend-service1:
+  users-service:
     #image: mcr.microsoft.com/dotnet/aspnet:latest
     image: mcr.microsoft.com/dotnet/sdk:latest
-    container_name: dotnetcv-backend-service1
+    container_name: dotnetcv-users-service
     restart: unless-stopped
     depends_on:
       - postgres
@@ -12,7 +12,7 @@ services:
     ports:
       - "5001:5001"
     volumes:
-      - ./backend/service1:/app
+      - ./backend/users-service:/app
     working_dir: /app
     command: [ "dotnet", "run" ]
     healthcheck:
@@ -26,10 +26,10 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  backend-service2:
+  orders-service:
     #image: mcr.microsoft.com/dotnet/aspnet:latest
     image: mcr.microsoft.com/dotnet/sdk:latest
-    container_name: dotnetcv-backend-service2
+    container_name: dotnetcv-orders-service
     restart: unless-stopped
     depends_on:
       - postgres
@@ -39,7 +39,7 @@ services:
     ports:
       - "5002:5002"
     volumes:
-      - ./backend/service2:/app
+      - ./backend/orders-service:/app
     working_dir: /app
     command: [ "dotnet", "run" ]
     healthcheck:

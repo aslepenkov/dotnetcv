@@ -57,12 +57,12 @@
           },
           "direction": "backward",
           "editorMode": "builder",
-          "expr": "{service_name=~\"dotnetcv-backend-service1\"}",
+          "expr": "{service_name=~\"dotnetcv-users-service\"}",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Backend Service1 Logs",
+      "title": "Backend Users Logs",
       "type": "logs"
     },
     {
@@ -145,12 +145,12 @@
           },
           "direction": "backward",
           "editorMode": "builder",
-          "expr": "{service_name=~\"dotnetcv-backend-service2\"}",
+          "expr": "{service_name=~\"dotnetcv-orders-service\"}",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Backend Services2 Logs",
+      "title": "Backend Orders Logs",
       "type": "logs"
     }
   ],
