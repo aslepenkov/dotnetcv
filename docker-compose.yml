@@ -20,6 +20,11 @@ services:
       interval: 10s
       retries: 3
       start_period: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   backend-service2:
     #image: mcr.microsoft.com/dotnet/aspnet:latest
@@ -42,6 +47,11 @@ services:
       interval: 10s
       retries: 3
       start_period: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   frontend:
     image: node:latest  # Latest Node.js
@@ -61,6 +71,11 @@ services:
       interval: 10s
       retries: 3
       start_period: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   lambda-builder:
     image: mcr.microsoft.com/dotnet/sdk:latest
@@ -134,10 +149,12 @@ services:
     image: grafana/promtail:latest
     container_name: dotnetcv-promtail
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./localstack/promtail-config.yml:/etc/promtail/config.yml
     command: -config.file=/etc/promtail/config.yml
     restart: unless-stopped
+    user: root   # Added to ensure proper permissions
 
   ## 📌 **Grafana for viewing logs**
   grafana:
@@ -147,7 +164,10 @@ services:
       - "3000:3000"
     volumes:
       - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
     restart: unless-stopped
+    depends_on:
+      - loki
 
 volumes:
   grafana-data:

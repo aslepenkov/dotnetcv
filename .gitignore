@@ -14,9 +14,7 @@ yarn-error.log*
 node_modules/
 jspm_packages/
 
-bin/
-obj/
-out/
+
 
 # Optional npm cache directory
 .npm
@@ -36,6 +34,7 @@ out/
 # .NET
 bin/
 obj/
+out/
 *.user
 *.suo
 *.userosscache
