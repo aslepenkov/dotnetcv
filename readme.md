@@ -47,3 +47,8 @@ docker exec -it dotnetcv-localstack bash /init-localstack.sh
 docker exec -it dotnetcv-localstack awslocal lambda invoke \
   --function-name PostgresHealthLambda \
   --payload '{}' /dev/stdout
+
+
+  WIPE
+
+  docker ps -aq | xargs -r docker rm -f && docker images -aq | xargs -r docker rmi -f && docker volume ls -q | xargs -r docker volume rm

@@ -1,39 +1,91 @@
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.Loki;
+using Microsoft.EntityFrameworkCore;
+using Amazon.Runtime;
+using Amazon.SimpleNotificationService;
+using Amazon.SQS;
 
-namespace SharedLibrary
+namespace SharedLibrary;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceExtensions
+    public static void AddSharedServices(this IServiceCollection services, IConfiguration configuration)
     {
-        public static void AddSharedServices(this IServiceCollection services, IConfiguration configuration)
+        // Add CORS
+        services.AddCors(options =>
         {
-            // Configure CORS
-            var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
-            services.AddCors(options =>
+            options.AddPolicy("FrontendPolicy", builder =>
             {
-                options.AddPolicy("FrontendPolicy", policy =>
-                {
-                    policy.SetIsOriginAllowed(origin =>
-                    {
-                        // Allow any port for localhost
-                        return allowedOrigins.Any(allowed => origin.StartsWith(allowed));
-                    })
-                    .AllowAnyMethod()
-                    .AllowAnyHeader();
-                });
+                builder.WithOrigins("http://localhost:5173")
+                       .AllowAnyMethod()
+                       .AllowAnyHeader()
+                       .AllowCredentials();
             });
-        }
+        });
 
-        public static void ConfigureLogging(this WebApplicationBuilder builder)
+        // Add AWS services configuration
+        var awsConfig = new Amazon.Runtime.BasicAWSCredentials("test", "test");
+        var awsEndpoint = new Uri("http://dotnetcv-localstack:4566");
+
+        services.AddSingleton<IAmazonSimpleNotificationService>(_ =>
+            new AmazonSimpleNotificationServiceClient(awsConfig, new AmazonSimpleNotificationServiceConfig
+            {
+                ServiceURL = awsEndpoint.ToString()
+            }));
+
+        services.AddSingleton<IAmazonSQS>(_ =>
+            new AmazonSQSClient(awsConfig, new AmazonSQSConfig
+            {
+                ServiceURL = awsEndpoint.ToString()
+            }));
+    }
+
+    public static void ConfigureLogging(this WebApplicationBuilder builder)
+    {
+        builder.Logging.ClearProviders();
+        
+        var logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .WriteTo.LokiHttp("http://dotnetcv-loki:3100")
+            .CreateLogger();
+
+        builder.Logging.AddSerilog(logger);
+    }
+
+    public static void AddPostgresDbContext<TContext>(this IServiceCollection services, IConfiguration configuration, string connectionStringName = "DefaultConnection")
+        where TContext : DbContext
+    {
+        services.AddDbContext<TContext>(options =>
+            options.UseNpgsql(
+                configuration.GetConnectionString(connectionStringName),
+                b => b.MigrationsAssembly(typeof(TContext).Assembly.FullName)));
+    }
+}
+
+public static class ApplicationBuilderExtensions
+{
+    public static void UseSharedMiddleware(this IApplicationBuilder app)
+    {
+        app.UseCors("FrontendPolicy");
+        app.UseSerilogRequestLogging();
+        
+        if (app.ApplicationServices.GetRequiredService<IWebHostEnvironment>().IsDevelopment())
         {
-            // Configure Serilog for request logging
-            Log.Logger = new LoggerConfiguration()
-                .WriteTo.Console()
-                .Enrich.FromLogContext()
-                .CreateLogger();
-
-            builder.Host.UseSerilog(); // Use Serilog as the logging provider
+            app.UseSwagger();
+            app.UseSwaggerUI();
+            app.MapOpenApi();
         }
+
+        app.UseHttpsRedirection();
+        app.UseAuthorization();
     }
 }
