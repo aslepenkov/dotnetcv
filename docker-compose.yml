@@ -6,6 +6,8 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
+    env_file:
+      - ./backend/users-service/secrets.env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5001
@@ -33,6 +35,8 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
+    env_file:
+      - ./backend/orders-service/secrets.env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5002
@@ -152,6 +156,40 @@ services:
     restart: unless-stopped
     depends_on:
       - loki
+
+  redis:
+    image: redis:latest
+    container_name: dotnetcv-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      retries: 3
+      start_period: 5s
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: dotnetcv-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      interval: 10s
+      retries: 3
+      start_period: 5s
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: dotnetcv-jaeger
+    restart: unless-stopped
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+      - "14250:14250"
 
   pgweb:
     image: sosedoff/pgweb:latest

@@ -4,30 +4,28 @@ public sealed record Order
 {
     private Order() { } // For EF Core
 
-    private Order(Guid id, Guid userId, decimal total, string status)
+    private Order(Guid id, decimal total, string status)
     {
         Id = id;
-        UserId = userId;
         Total = total;
         Status = status;
         CreatedAt = DateTime.UtcNow;
     }
 
     public Guid Id { get; init; }
-    public Guid UserId { get; init; }
     public decimal Total { get; init; }
     public string Status { get; init; } = string.Empty;
     public DateTime CreatedAt { get; init; }
 
-    public static Order Create(Guid userId, decimal total)
+    public static Order Create(decimal total, string status)
     {
-        if (userId == Guid.Empty)
-            throw new ArgumentException("Invalid user ID", nameof(userId));
-        
         if (total < 0)
             throw new ArgumentException("Total cannot be negative", nameof(total));
 
-        return new Order(Guid.NewGuid(), userId, total, "Pending");
+        if (string.IsNullOrWhiteSpace(status))
+            throw new ArgumentException("Status cannot be empty", nameof(status));
+
+        return new Order(Guid.NewGuid(), total, status);
     }
 
     public Order UpdateStatus(string newStatus)

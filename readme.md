@@ -1,7 +1,5 @@
 # 🚀 High-Scale Microservices Architecture Demo
 
-> ⚠️ **Work In Progress**: This project is currently under active development. Features and documentation may be incomplete or subject to change.
-
 A production-grade demonstration of cloud-native microservices architecture, implementing industry best practices for building highly scalable, maintainable, and resilient distributed systems.
 
 ## 💫 Why This Project?
@@ -14,6 +12,8 @@ This project showcases practical implementation of:
 - **Observability First**: Complete monitoring and logging infrastructure built-in
 
 ## 🏗️ Architecture Overview
+
+For a detailed architecture overview, please see the [ARCHITECTURE.md](ARCHITECTURE.md) file.
 
 ### Core Design Principles
 - **Domain-Driven Design (DDD)**: Clear bounded contexts with Users and Orders domains
@@ -43,6 +43,8 @@ This project showcases practical implementation of:
 
 ### Infrastructure 🌐
 - **PostgreSQL**: Primary data store
+- **Redis**: Distributed caching
+- **RabbitMQ**: Message broker for event-driven communication
 - **LocalStack**: AWS service emulation for local development
   - Lambda functions for health checks
   - API Gateway integration
@@ -52,6 +54,7 @@ This project showcases practical implementation of:
   - Grafana dashboards for real-time monitoring
   - Loki for structured log aggregation
   - Promtail for automated log collection
+  - Jaeger for distributed tracing
   - Custom metrics and alerts
   - Performance monitoring
 
@@ -67,10 +70,10 @@ This project showcases practical implementation of:
 
 ## 🛠️ Tech Stack
 
-- **Backend**: .NET 9.0, EF Core, PostgreSQL
+- **Backend**: .NET 9.0, EF Core, PostgreSQL, Redis, RabbitMQ
 - **Frontend**: React 18, TypeScript, Material-UI
 - **Infrastructure**: Docker, Docker Compose, LocalStack
-- **Monitoring**: Grafana, Loki, Prometheus
+- **Monitoring**: Grafana, Loki, Prometheus, Jaeger
 - **Testing**: xUnit, Jest, Cypress
 - **Documentation**: OpenAPI/Swagger
 
@@ -88,6 +91,8 @@ Access points:
 - Users API: http://localhost:5001/swagger
 - Orders API: http://localhost:5002/swagger
 - Grafana: http://localhost:3000
+- Jaeger: http://localhost:16686
+- RabbitMQ: http://localhost:15672
 - PgWeb (Database UI): http://localhost:8081
 
 ## 📊 Monitoring & Observability
@@ -99,6 +104,7 @@ Comprehensive monitoring setup with:
 - Resource utilization tracking
 - Custom business metrics
 - Log aggregation and search
+- Distributed tracing
 
 ## 🎓 Learning Resources
 
@@ -117,72 +123,3 @@ This project serves as a practical reference for:
 - Asynchronous processing patterns
 - Connection pooling and resource management
 - Rate limiting and throttling
-
-## 📝 TODO: Modern Architecture Enhancements
-
-### Message-Driven Architecture
-- [ ] Implement Apache Kafka/RabbitMQ for event-driven communication
-- [ ] Add Event Sourcing pattern for order processing
-- [ ] Implement Saga pattern for distributed transactions
-- [ ] Add outbox pattern for reliable message publishing
-
-### API & Communication
-- [ ] Implement GraphQL API gateway
-- [ ] Add gRPC communication between services
-- [ ] Implement API versioning strategy
-- [ ] Add BFF (Backend for Frontend) pattern
-- [ ] Implement rate limiting and API quotas
-
-### Data & Caching
-- [ ] Add Redis for distributed caching
-- [ ] Implement CQRS with separate read/write databases
-- [ ] Add Elasticsearch for advanced search capabilities
-- [ ] Implement database sharding strategy
-- [ ] Add data retention and archiving policies
-
-### Cloud-Native Features
-- [ ] Implement service mesh (Istio/Linkerd)
-- [ ] Add Kubernetes manifests for cloud deployment
-- [ ] Implement blue-green deployment strategy
-- [ ] Add chaos engineering capabilities
-- [ ] Implement cloud-native storage solutions
-
-### Security & Identity
-- [ ] Add OAuth2/OpenID Connect with Keycloak
-- [ ] Implement mTLS between services
-- [ ] Add API key management
-- [ ] Implement secrets rotation
-- [ ] Add security scanning in CI/CD
-
-### Scalability & Performance
-- [ ] Add auto-scaling policies
-- [ ] Implement backpressure handling
-- [ ] Add distributed tracing (Jaeger/Zipkin)
-- [ ] Implement circuit breakers with Polly
-- [ ] Add performance testing suite
-
-### Developer Experience
-- [ ] Add OpenAPI/Swagger UI customization
-- [ ] Implement dev containers
-- [ ] Add comprehensive API documentation
-- [ ] Create architectural decision records (ADRs)
-- [ ] Add developer onboarding documentation
-
-### Testing & Quality
-- [ ] Add contract testing with PACT
-- [ ] Implement load testing with k6
-- [ ] Add mutation testing
-- [ ] Implement security testing
-- [ ] Add performance benchmarking suite
-
-### AI/ML Integration
-- [ ] Add anomaly detection for monitoring
-- [ ] Implement predictive scaling
-- [ ] Add ML-powered request routing
-- [ ] Implement intelligent caching
-
-### Compliance & Auditing
-- [ ] Add GDPR compliance features
-- [ ] Implement audit logging
-- [ ] Add data lineage tracking
-- [ ] Implement retention policies

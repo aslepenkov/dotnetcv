@@ -6,13 +6,13 @@ namespace app.Infrastructure;
 
 public static class Database
 {
-    public static IServiceCollection AddFluentMigrator(this IServiceCollection services, string connectionString)
+    public static IServiceCollection AddFluentMigrator(this IServiceCollection services, IConfiguration configuration)
     {
         services
             .AddFluentMigratorCore()
             .ConfigureRunner(rb => rb
                 .AddPostgres()
-                .WithGlobalConnectionString(connectionString)
+                .WithGlobalConnectionString(configuration.GetConnectionString("DefaultConnection"))
                 .ScanIn(typeof(Database).Assembly).For.Migrations())
             .AddLogging(lb => lb.AddFluentMigratorConsole());
 

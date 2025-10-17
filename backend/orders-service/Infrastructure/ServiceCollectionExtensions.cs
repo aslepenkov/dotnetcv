@@ -6,7 +6,10 @@ using Amazon.SimpleNotificationService;
 using Amazon.SQS;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
+using OrdersService.Infrastructure;
+using StackExchange.Redis;
+using MassTransit;
+using OpenTelemetry.Trace;
 
 namespace OrdersService.Infrastructure;
 
@@ -29,7 +32,7 @@ public static class ServiceCollectionExtensions
             { 
                 Title = "OrdersService API", 
                 Version = "v1",
-                Description = "OrdersService API for Order management"
+                Description = "OrdersService API for order management"
             });
         });
         
@@ -81,6 +84,53 @@ public static class ServiceCollectionExtensions
                        .AllowCredentials();
             });
         });
+
+        return services;
+    }
+
+    public static IServiceCollection AddResiliencePolicies(this IServiceCollection services)
+    {
+        services.AddHttpClient("DefaultClient")
+            .AddPolicyHandler(ResiliencePolicies.GetCircuitBreakerPolicy());
+
+        return services;
+    }
+
+    public static IServiceCollection AddRedisCache(this IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString("Redis");
+        services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(connectionString));
+
+        return services;
+    }
+
+    public static IServiceCollection AddMessageBroker(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddMassTransit(x =>
+        {
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                cfg.Host(configuration.GetConnectionString("RabbitMQ"));
+            });
+        });
+
+        return services;
+    }
+
+    public static IServiceCollection AddOpenTelemetry(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddOpenTelemetry()
+            .WithTracing(builder =>
+            {
+                builder
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddJaegerExporter(options =>
+                    {
+                        options.AgentHost = configuration["Jaeger:Host"];
+                        options.AgentPort = configuration.GetValue<int>("Jaeger:Port");
+                    });
+            });
 
         return services;
     }

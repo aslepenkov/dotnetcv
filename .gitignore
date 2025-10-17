@@ -41,3 +41,4 @@ out/
 *.sln.docstates
 *.userprefs
 *.csproj.user
+secrets.env
