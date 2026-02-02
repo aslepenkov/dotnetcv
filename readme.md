@@ -16,10 +16,11 @@ This project showcases practical implementation of:
 For a detailed architecture overview, please see the [ARCHITECTURE.md](ARCHITECTURE.md) file.
 
 ### Core Design Principles
-- **Domain-Driven Design (DDD)**: Clear bounded contexts with Users and Orders domains
+- **Domain-Driven Design (DDD)**: Clear bounded contexts with Users, Orders, and Products domains
 - **Event-Driven Architecture**: Loose coupling through event-based communication
 - **Defense in Depth**: Health checks, circuit breakers, and failover mechanisms
 - **Zero-Trust Security**: Service isolation and independent scaling
+- **Polyglot Architecture**: Technology diversity with .NET and Python services
 
 ### Backend Services 🔧
 - **Users Service** (.NET 9.0)
@@ -27,12 +28,22 @@ For a detailed architecture overview, please see the [ARCHITECTURE.md](ARCHITECT
   - CQRS with clear separation of read/write concerns
   - Optimized query patterns with Entity Framework Core
   - RESTful API with OpenAPI documentation
+  - Redis caching integration
 
 - **Orders Service** (.NET 9.0)
   - Independent bounded context demonstration
   - Scalable order processing pipeline
   - Domain events for cross-service communication
   - Eventual consistency patterns
+  - Redis caching integration
+
+- **Products Service** (Python/Django)
+  - Django REST Framework API
+  - PostgreSQL with Django ORM
+  - Redis caching for performance optimization
+  - OpenTelemetry distributed tracing
+  - OpenAPI/Swagger documentation
+  - Production-ready with Gunicorn
 
 ### Frontend 🎨
 - Modern React application with TypeScript
@@ -70,7 +81,7 @@ For a detailed architecture overview, please see the [ARCHITECTURE.md](ARCHITECT
 
 ## 🛠️ Tech Stack
 
-- **Backend**: .NET 9.0, EF Core, PostgreSQL, Redis, RabbitMQ
+- **Backend**: .NET 9.0, Python 3.11, Django 4.2, EF Core, Django ORM, PostgreSQL, Redis, RabbitMQ
 - **Frontend**: React 18, TypeScript, Material-UI
 - **Infrastructure**: Docker, Docker Compose, LocalStack
 - **Monitoring**: Grafana, Loki, Prometheus, Jaeger
@@ -90,6 +101,7 @@ Access points:
 - Frontend: http://localhost:5173
 - Users API: http://localhost:5001/swagger
 - Orders API: http://localhost:5002/swagger
+- Products API: http://localhost:5003/api/swagger/
 - Grafana: http://localhost:3000
 - Jaeger: http://localhost:16686
 - RabbitMQ: http://localhost:15672

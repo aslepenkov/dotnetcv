@@ -6,6 +6,7 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
+      - redis
     env_file:
       - ./backend/users-service/secrets.env
     environment:
@@ -35,6 +36,7 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
+      - redis
     env_file:
       - ./backend/orders-service/secrets.env
     environment:
@@ -51,6 +53,42 @@ services:
       interval: 10s
       retries: 3
       start_period: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  products-service:
+    build:
+      context: ./backend/products-service
+      dockerfile: Dockerfile
+    container_name: dotnetcv-products-service
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+      - jaeger
+    environment:
+      - SECRET_KEY=dev-secret-key-change-in-production
+      - DEBUG=True
+      - DB_NAME=dotnetcv
+      - DB_USER=admin
+      - DB_PASSWORD=admin
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - REDIS_URL=redis://redis:6379/1
+      - JAEGER_HOST=jaeger
+      - JAEGER_PORT=6831
+    ports:
+      - "5003:5003"
+    volumes:
+      - ./backend/products-service:/app
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5003/health" ]
+      interval: 10s
+      retries: 3
+      start_period: 10s
     logging:
       driver: "json-file"
       options:
