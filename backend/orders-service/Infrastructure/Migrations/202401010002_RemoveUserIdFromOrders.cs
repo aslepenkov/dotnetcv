@@ -2,7 +2,7 @@ using FluentMigrator;
 
 namespace OrdersService.Infrastructure.Migrations;
 
-[Migration(202401010002)]
+[Migration(202504262)]
 public class RemoveUserIdFromOrders : Migration
 {
     public override void Up()

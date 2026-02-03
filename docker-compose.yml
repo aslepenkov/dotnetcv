@@ -7,11 +7,13 @@ services:
     depends_on:
       - postgres
       - redis
+      - rabbitmq
     env_file:
       - ./backend/users-service/secrets.env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5001
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=dotnetcv_users;Username=admin;Password=admin
     ports:
       - "5001:5001"
     volumes:
@@ -37,11 +39,13 @@ services:
     depends_on:
       - postgres
       - redis
+      - rabbitmq
     env_file:
       - ./backend/orders-service/secrets.env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5002
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=dotnetcv_orders;Username=admin;Password=admin
     ports:
       - "5002:5002"
     volumes:
@@ -152,6 +156,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./backend/postgres-init:/docker-entrypoint-initdb.d
 
   # dev:
   #   image: mcr.microsoft.com/dotnet/sdk:latest
