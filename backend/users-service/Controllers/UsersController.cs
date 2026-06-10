@@ -61,4 +61,27 @@ public class UsersController : ControllerBase
             return NotFound(new { Message = $"User with ID {id} not found" });
         return Ok(user);
     }
+
+    /// <summary>
+    /// A synthetic bottleneck endpoint to simulate high CPU load for HPA testing.
+    /// Enabled via ENABLE_BOTTLENECK environment variable.
+    /// </summary>
+    [HttpGet("bottleneck")]
+    public IActionResult Bottleneck([FromQuery] int iterations = 100000000)
+    {
+        var isEnabled = Environment.GetEnvironmentVariable("ENABLE_BOTTLENECK") == "true";
+        if (!isEnabled)
+        {
+            return BadRequest(new { Message = "Bottleneck simulation is not enabled. Set ENABLE_BOTTLENECK=true." });
+        }
+
+        // Perform some CPU intensive work
+        double result = 0;
+        for (int i = 0; i < iterations; i++)
+        {
+            result += Math.Sqrt(i);
+        }
+
+        return Ok(new { Message = "Bottleneck simulation completed", Result = result });
+    }
 }

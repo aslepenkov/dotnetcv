@@ -10,6 +10,7 @@ public class OrderDbContext : DbContext
     }
 
     public DbSet<Order> Orders => Set<Order>();
+    public DbSet<Outbox> OutboxMessages => Set<Outbox>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -18,6 +19,14 @@ public class OrderDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Total).HasColumnType("decimal(18,2)");
             entity.Property(e => e.Status).IsRequired();
+        });
+
+        modelBuilder.Entity<Outbox>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Type).IsRequired();
+            entity.Property(e => e.Data).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
         });
     }
 }

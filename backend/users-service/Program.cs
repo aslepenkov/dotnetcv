@@ -18,7 +18,13 @@ builder.Services
     .AddPostgresDbContext<UserDbContext>(builder.Configuration)
     .AddAwsServices(builder.Configuration)
     .AddCorsPolicy()
-    .AddFluentMigrator(builder.Configuration.GetConnectionString("DefaultConnection"));
+    .AddFluentMigrator(builder.Configuration)
+    .AddResiliencePolicies()
+    .AddRedisCache(builder.Configuration)
+    .AddMessageBroker(builder.Configuration);
+
+builder.Services.AddHostedService<OutboxProcessor>();
+builder.Services.AddOpenTelemetry(builder.Configuration);
 
 var app = builder.Build();
 

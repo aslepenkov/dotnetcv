@@ -6,9 +6,14 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
+      - redis
+      - rabbitmq
+    env_file:
+      - ./backend/users-service/secrets.env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5001
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=dotnetcv_users;Username=admin;Password=admin
     ports:
       - "5001:5001"
     volumes:
@@ -33,9 +38,14 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
+      - redis
+      - rabbitmq
+    env_file:
+      - ./backend/orders-service/secrets.env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5002
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=dotnetcv_orders;Username=admin;Password=admin
     ports:
       - "5002:5002"
     volumes:
@@ -47,6 +57,42 @@ services:
       interval: 10s
       retries: 3
       start_period: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  products-service:
+    build:
+      context: ./backend/products-service
+      dockerfile: Dockerfile
+    container_name: dotnetcv-products-service
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+      - jaeger
+    environment:
+      - SECRET_KEY=dev-secret-key-change-in-production
+      - DEBUG=True
+      - DB_NAME=dotnetcv
+      - DB_USER=admin
+      - DB_PASSWORD=admin
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - REDIS_URL=redis://redis:6379/1
+      - JAEGER_HOST=jaeger
+      - JAEGER_PORT=6831
+    ports:
+      - "5003:5003"
+    volumes:
+      - ./backend/products-service:/app
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5003/health" ]
+      interval: 10s
+      retries: 3
+      start_period: 10s
     logging:
       driver: "json-file"
       options:
@@ -110,6 +156,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./backend/postgres-init:/docker-entrypoint-initdb.d
 
   # dev:
   #   image: mcr.microsoft.com/dotnet/sdk:latest
@@ -152,6 +199,40 @@ services:
     restart: unless-stopped
     depends_on:
       - loki
+
+  redis:
+    image: redis:latest
+    container_name: dotnetcv-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      retries: 3
+      start_period: 5s
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: dotnetcv-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      interval: 10s
+      retries: 3
+      start_period: 5s
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: dotnetcv-jaeger
+    restart: unless-stopped
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+      - "14250:14250"
 
   pgweb:
     image: sosedoff/pgweb:latest

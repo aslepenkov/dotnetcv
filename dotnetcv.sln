@@ -1,0 +1,67 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{1AE8ACA6-933B-BF2A-3671-3E2EAC007D16}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lambda", "lambda", "{7459E685-8883-CB08-9F0F-A142470721FC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "users-service", "users-service", "{1AB6B5C3-9B70-7BD4-6568-CC6C7BAFEA3D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "app", "backend\users-service\app.csproj", "{F664A583-CB5A-D109-4B7E-F3F3ECC65EB8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "orders-service", "orders-service", "{AB785D33-BB46-D368-1D47-A190EE28AC8A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "app", "backend\orders-service\app.csproj", "{6A5C62FB-002D-25A8-15F5-350D195FEF1D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PostgresHealthLambda", "PostgresHealthLambda", "{7CBBDE76-43E7-706E-F07C-40EFDC0BB16F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B953048D-C8FB-29EB-11DA-DA6C5203B373}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PostgresHealthLambda", "lambda\PostgresHealthLambda\src\PostgresHealthLambda\PostgresHealthLambda.csproj", "{8A1E62F9-C365-C2A0-2F82-9CD206D05965}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{EC1D2985-0327-0F71-91C3-DEB5099667B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PostgresHealthLambda.Tests", "lambda\PostgresHealthLambda\test\PostgresHealthLambda.Tests\PostgresHealthLambda.Tests.csproj", "{CEE420D8-85EB-C6B1-CE03-DBC6B1115D36}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F664A583-CB5A-D109-4B7E-F3F3ECC65EB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F664A583-CB5A-D109-4B7E-F3F3ECC65EB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F664A583-CB5A-D109-4B7E-F3F3ECC65EB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F664A583-CB5A-D109-4B7E-F3F3ECC65EB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A5C62FB-002D-25A8-15F5-350D195FEF1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A5C62FB-002D-25A8-15F5-350D195FEF1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A5C62FB-002D-25A8-15F5-350D195FEF1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A5C62FB-002D-25A8-15F5-350D195FEF1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A1E62F9-C365-C2A0-2F82-9CD206D05965}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A1E62F9-C365-C2A0-2F82-9CD206D05965}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A1E62F9-C365-C2A0-2F82-9CD206D05965}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A1E62F9-C365-C2A0-2F82-9CD206D05965}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEE420D8-85EB-C6B1-CE03-DBC6B1115D36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEE420D8-85EB-C6B1-CE03-DBC6B1115D36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEE420D8-85EB-C6B1-CE03-DBC6B1115D36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEE420D8-85EB-C6B1-CE03-DBC6B1115D36}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1AB6B5C3-9B70-7BD4-6568-CC6C7BAFEA3D} = {1AE8ACA6-933B-BF2A-3671-3E2EAC007D16}
+		{F664A583-CB5A-D109-4B7E-F3F3ECC65EB8} = {1AB6B5C3-9B70-7BD4-6568-CC6C7BAFEA3D}
+		{AB785D33-BB46-D368-1D47-A190EE28AC8A} = {1AE8ACA6-933B-BF2A-3671-3E2EAC007D16}
+		{6A5C62FB-002D-25A8-15F5-350D195FEF1D} = {AB785D33-BB46-D368-1D47-A190EE28AC8A}
+		{7CBBDE76-43E7-706E-F07C-40EFDC0BB16F} = {7459E685-8883-CB08-9F0F-A142470721FC}
+		{B953048D-C8FB-29EB-11DA-DA6C5203B373} = {7CBBDE76-43E7-706E-F07C-40EFDC0BB16F}
+		{8A1E62F9-C365-C2A0-2F82-9CD206D05965} = {B953048D-C8FB-29EB-11DA-DA6C5203B373}
+		{EC1D2985-0327-0F71-91C3-DEB5099667B1} = {7CBBDE76-43E7-706E-F07C-40EFDC0BB16F}
+		{CEE420D8-85EB-C6B1-CE03-DBC6B1115D36} = {EC1D2985-0327-0F71-91C3-DEB5099667B1}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {67C682C2-E908-4207-B687-4D0CC2E81A25}
+	EndGlobalSection
+EndGlobal
